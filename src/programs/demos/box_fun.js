@@ -5,7 +5,7 @@
 @desc   Think inside of the box
 */
 
-import { clamp, map } from '/src/modules/num.js'
+import { clamp, map } from '../../modules/num.js'
 
 const {sin, cos, floor} = Math
 
@@ -14,7 +14,7 @@ export function main(coord, context, cursor, buffer) {
 	return (coord.x + coord.y) % 2 ? '·' : ' '
 }
 
-import { drawBox } from '/src/modules/drawbox.js'
+import { drawBox } from '../../modules/drawbox.js'
 export function post(context, cursor, buffer) {
 	const { rows, cols } =  context
 	const t = context.time * 0.002

@@ -9,13 +9,10 @@
 			margin: 0;
 		}
 
-		body {
-			position: relative;
-		}
-
 		canvas, pre {
 			position: absolute;
 			inset: 0;
+			margin: 0;
 			font-size: 16px;
 			line-height: 19px;
 			font-family: 'Consolas', monospace;
@@ -26,8 +23,8 @@
 	<canvas></canvas>
 	<pre></pre>
 	<script type="module">
-		import { run } from '/src/run.js'
-		import * as program from '/src/programs/demos/doom_flame_full_color.js'
+		import { run } from './src/run.js'
+		import * as program from './src/programs/demos/doom_flame_full_color.js'
 		// run(program, {
 		// 	element : document.querySelector('canvas'),
 		// 	fps: '60',
@@ -39,7 +36,7 @@
 		// }).then(function(e){
 		run(program, {
 			element : document.querySelector('pre'),
-			fps: '3',
+			fps: '30',
 			renderer: 'text',
 			cols: 80,
 			rows: 40
