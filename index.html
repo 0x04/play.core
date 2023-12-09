@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+	<meta charset="utf-8">
+	<title>Test single</title>
+	<style media="screen">
+		html, body {
+			padding: 0;
+			margin: 0;
+		}
+
+		body {
+			position: relative;
+		}
+
+		canvas, pre {
+			position: absolute;
+			inset: 0;
+			font-size: 16px;
+			line-height: 19px;
+			font-family: 'Consolas', monospace;
+		}
+	</style>
+</head>
+<body>
+	<canvas></canvas>
+	<pre></pre>
+	<script type="module">
+		import { run } from '/src/run.js'
+		import * as program from '/src/programs/demos/doom_flame_full_color.js'
+		// run(program, {
+		// 	element : document.querySelector('canvas'),
+		// 	fps: '60',
+		// 	renderer: 'canvas',
+		// 	canvasSize : {
+		// 		width : 80,
+		// 		height : 40
+		// 	},
+		// }).then(function(e){
+		run(program, {
+			element : document.querySelector('pre'),
+			fps: '3',
+			renderer: 'text',
+			cols: 80,
+			rows: 40
+		}).then(function(e){
+			console.log(e)
+		}).catch(function(e) {
+			console.warn(e.message)
+			console.log(e.error)
+		})
+	</script>
+</body>
+</html>
