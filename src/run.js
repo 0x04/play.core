@@ -56,7 +56,7 @@ export function run(program, runSettings, userData = {}) {
 	// If the program reaches the bottom of the first frame the promise is resolved.
 	return new Promise(function(resolve) {
 		// Merge of user- and default settings
-		const settings = {...defaultSettings, ...runSettings, ...program.settings}
+		const settings = {...defaultSettings, ...program.settings, ...runSettings}
 
 		// State is stored in local storage and will loaded on program launch
 		// if settings.restoreState == true.
