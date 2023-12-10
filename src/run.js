@@ -5,6 +5,7 @@ Runner
 // Both available renderers are imported
 import textRenderer from './core/textrenderer.js'
 import canvasRenderer from './core/canvasrenderer.js'
+import gradientRenderer from './core/gradientrenderer.js'
 import FPS from './core/fps.js'
 import storage from './core/storage.js'
 import RUNNER_VERSION from './core/version.js'
@@ -12,8 +13,9 @@ import RUNNER_VERSION from './core/version.js'
 export { RUNNER_VERSION }
 
 const renderers = {
-	'canvas' : canvasRenderer,
-	'text'   : textRenderer
+	'canvas'  : canvasRenderer,
+	'text'    : textRenderer,
+	'gradient': gradientRenderer
 }
 
 // Default settings for the program runner.

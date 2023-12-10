@@ -3,43 +3,73 @@
 <head>
 	<meta charset="utf-8">
 	<title>Test single</title>
-	<style media="screen">
-		html, body {
-			padding: 0;
-			margin: 0;
+	<style>
+
+		body {
+			margin: 1rem;
+			background: rgba(0, 0, 0, 0.25);
+			font-family: Consolas, monospace;
 		}
 
-		canvas, pre {
+		.gradient-renderer {
+			--gradient-renderer-font-size: 1rem;
+			--gradient-renderer-line-bg: none;
+			--gradient-renderer-line-fg: #000;
+			--gradient-renderer-line-height: 1.125;
+			--gradient-renderer-calculated-line-height: calc(var(--gradient-renderer-font-size) * var(--gradient-renderer-line-height));
+			display: inline-flex;
+			flex-direction: column;
+			font-size: var(--gradient-renderer-font-size);
+			line-height: var(--gradient-renderer-calculated-line-height);
+			margin-top: 0;
+			font-optical-sizing: none;
+			font-kerning: none;
+		}
+
+		/* Colorize foreground */
+		.gradient-renderer > span {
+			position: relative;
+			color: transparent;
+
+			/**
+			 * <box> @see https://developer.mozilla.org/en-US/docs/Web/CSS/background#box
+			 * - `-webkit-text` and `text` - doesn't work! I think because of it is non-standard nature.
+			 * - `content-box` - work!
+			 */
+			background: var(--gradient-renderer-line-fg);
+			background-clip: text !important;
+			-webkit-background-clip: text !important;
+		}
+
+		/* Colorize background */
+		.gradient-renderer > span::before {
 			position: absolute;
 			inset: 0;
-			margin: 0;
-			font-size: 16px;
-			line-height: 19px;
-			font-family: 'Consolas', monospace;
+			z-index: -1;
+			content: '';
+			background: var(--gradient-renderer-line-bg);
 		}
+
 	</style>
 </head>
 <body>
-	<canvas></canvas>
-	<pre></pre>
+
+	<pre id="gradient" class="gradient-renderer"></pre>
+
 	<script type="module">
 		import { run } from './src/run.js'
 		import * as program from './src/programs/demos/doom_flame_full_color.js'
-		// run(program, {
-		// 	element : document.querySelector('canvas'),
-		// 	fps: '60',
-		// 	renderer: 'canvas',
-		// 	canvasSize : {
-		// 		width : 80,
-		// 		height : 40
-		// 	},
-		// }).then(function(e){
+
 		run(program, {
-			element : document.querySelector('pre'),
-			fps: '30',
-			renderer: 'text',
+			allowSelect: true,
+			element : document.querySelector('#gradient'),
+			fps: '60',
+			renderer: 'gradient',
 			cols: 80,
-			rows: 40
+			rows: 30,
+			color: 'black',
+			// FIXME: have to be transparent for `doom_flame_full_color.js`
+			backgroundColor: 'transparent'
 		}).then(function(e){
 			console.log(e)
 		}).catch(function(e) {
