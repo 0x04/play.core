@@ -74,50 +74,35 @@ function render(context, buffer) {
         // Skip row if update is not necessary
         if (!rowNeedsUpdate) continue
 
+        // Write the row
+        const row = element.childNodes[j]
         const colorStops = {color: [], backgroundColor: []}
-        let prevCell = createDefaultCell(context.settings)
+        let prevCell = {}
 
         for (let i = 0; i < cols; i++) {
             const currCell = buffer[i + offs] //|| {...defaultCell, char : EMPTY_CELL}
 
             for (const type of types) {
-                const target = colorStops[type]
+                const currColorStops = colorStops[type]
 
                 if (!isSameCellStyle(prevCell, currCell, type)) {
-                    const prev = target.at(-1);
-                    target.push(createColorStop(currCell[type], prev ? prev.end : 0, i))
+                    currColorStops.push(createColorStop(currCell[type], i))
+                }
 
-                    if (prev) {
-                        prev.end = i;
-                    }
+                if (i === cols - 1) {
+                    currColorStops.push(createColorStop('transparent', cols))
+
+                    const propertyName = (type === 'color') ? 'fg' : 'bg'
+                    const colorStops = getColorStops(currColorStops)
+
+                    row.style.setProperty(
+                        `--gradient-renderer-line-${propertyName}`,
+                        `content-box linear-gradient(90deg, ${colorStops}) no-repeat`
+                    )
                 }
             }
 
             prevCell = currCell
-        }
-
-        // Write the row
-        const row = element.childNodes[j]
-
-        for (let t = 0; t < types.length; t++) {
-            const type = types.at(t)
-            const target = colorStops[type]
-
-            if (target.length) {
-                const lastColorStop = target.at(-1)
-
-                lastColorStop.end = cols;
-
-                target.push(createColorStop('transparent', cols))
-
-                const propertyName = (type === 'color') ? 'fg' : 'bg'
-                const colorStops = getColorStops(target)
-
-                row.style.setProperty(
-                    `--gradient-renderer-line-${propertyName}`,
-                    `content-box linear-gradient(90deg, ${colorStops}) no-repeat`
-                )
-            }
         }
 
         row.innerText = buffer
@@ -142,25 +127,25 @@ function isSameCellStyle(cellA, cellB, type) {
 
 function getColorStops(colorStops) {
     return colorStops.reduce(
-        (colorStops, colorStop) => {
-            let result = [ colorStop.value ]
+        (rendered, curr, index) => {
+            const next = colorStops.at(index + 1);
+            const result = [ curr.value ];
 
-            if (colorStop.start > -1)
-            {
-                result.push(`${colorStop.start}ch`)
+            if (curr.index > 0) {
+                result.push(`${curr.index}ch`)
             }
 
-            if (colorStop.end > -1)
-            {
-                result.push(`${colorStop.end}ch`)
+            if (next) {
+                result.push(`${next.index}ch`)
             }
 
-            return [ ...colorStops, result.join(' ') ];
+            rendered.push(result.join(' '))
+
+            return rendered
         },
         []
     ).join(',')
 }
 
-const createColorStop = (value, start, end = -1) => ({ value, start, end })
+const createColorStop = (value, index) => ({ value, index })
 
-const createDefaultCell = (settings) => types.reduce((cell, type) => ({ [type]: settings[type], ...cell }), {});
