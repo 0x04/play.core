@@ -32,7 +32,6 @@ function render(context, buffer) {
     // TODO: also benchmark a complete 'innerHTML' rewrite, could be faster?
     while (element.childElementCount < rows) {
         const span = document.createElement('span')
-        span.style.setProperty('display', 'block')
         element.appendChild(span)
     }
 
@@ -76,27 +75,22 @@ function render(context, buffer) {
         if (!rowNeedsUpdate) continue
 
         const colorStops = {color: [], backgroundColor: []}
-        let prevCell = {}
+        let prevCell = createDefaultCell(context.settings)
 
         for (let i = 0; i < cols; i++) {
             const currCell = buffer[i + offs] //|| {...defaultCell, char : EMPTY_CELL}
 
-            for (let t = 0; t < types.length; t++) {
-                const type = types.at(t)
+            for (const type of types) {
+                const target = colorStops[type]
 
                 if (!isSameCellStyle(prevCell, currCell, type)) {
-                    const colorStopTarget = colorStops[type]
+                    const prev = target.at(-1);
+                    target.push(createColorStop(currCell[type], prev ? prev.end : 0, i))
 
-                    if (prevCell[type]) {
-                        colorStopTarget.push(createColorStop(prevCell[type], i))
+                    if (prev) {
+                        prev.end = i;
                     }
-
-                    const currentColor = currCell[type]
-                        ?? context.settings[type]
-
-                    colorStopTarget.push(createColorStop(currentColor, i))
                 }
-
             }
 
             prevCell = currCell
@@ -111,13 +105,10 @@ function render(context, buffer) {
 
             if (target.length) {
                 const lastColorStop = target.at(-1)
-                const lastColorStopIndex = cols - 1
 
-                target
-                    .push(
-                        createColorStop(lastColorStop.value, lastColorStopIndex),
-                        createColorStop('transparent', lastColorStopIndex)
-                    )
+                lastColorStop.end = cols;
+
+                target.push(createColorStop('transparent', cols))
 
                 const propertyName = (type === 'color') ? 'fg' : 'bg'
                 const colorStops = getColorStops(target)
@@ -151,11 +142,25 @@ function isSameCellStyle(cellA, cellB, type) {
 
 function getColorStops(colorStops) {
     return colorStops.reduce(
-        (colorStopsString, colorStop) =>
-            (colorStopsString ? `${colorStopsString},` : '')
-            + `${colorStop.value} ${colorStop.index}ch`,
-        ''
-    )
+        (colorStops, colorStop) => {
+            let result = [ colorStop.value ]
+
+            if (colorStop.start > -1)
+            {
+                result.push(`${colorStop.start}ch`)
+            }
+
+            if (colorStop.end > -1)
+            {
+                result.push(`${colorStop.end}ch`)
+            }
+
+            return [ ...colorStops, result.join(' ') ];
+        },
+        []
+    ).join(',')
 }
 
-const createColorStop = (value, index) => ({value, index})
+const createColorStop = (value, start, end = -1) => ({ value, start, end })
+
+const createDefaultCell = (settings) => types.reduce((cell, type) => ({ [type]: settings[type], ...cell }), {});
