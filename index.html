@@ -12,7 +12,6 @@
 
 		body {
 			margin: 0;
-			background: #000;
 			font-family: Consolas, monospace;
 			overflow: hidden;
 			display: flex;
@@ -21,15 +20,15 @@
 		.gradient-renderer {
 			--gradient-renderer-cols: 80;
 			--gradient-renderer-row: 40;
-			--gradient-renderer-font-size: 1rem;
+			--gradient-renderer-font-size: 2rem;
 			--gradient-renderer-line-bg: none;
 			--gradient-renderer-line-fg: #000;
 			--gradient-renderer-line-height: 1.125;
 			--gradient-renderer-calculated-line-height: calc(var(--gradient-renderer-font-size) * var(--gradient-renderer-line-height));
 			display: inline-block;
+			margin: auto;
 			font-size: var(--gradient-renderer-font-size);
 			line-height: var(--gradient-renderer-calculated-line-height);
-			margin: auto;
 		}
 
 		/* Colorize foreground */
@@ -44,9 +43,8 @@
 			 * - `content-box` - work!
 			 */
 			background: var(--gradient-renderer-line-fg);
-			background-position: 0 0;
-			background-clip: text !important;
-			-webkit-background-clip: text !important;
+			background-clip: text;
+			-webkit-background-clip: text;
 		}
 
 		/* Colorize background */
@@ -56,6 +54,10 @@
 			z-index: -1;
 			content: '';
 			background: var(--gradient-renderer-line-bg);
+		}
+
+		.gradient-renderer > span,
+		.gradient-renderer > span::before {
 			background-position: 0 0;
 			background-size: calc((var(--gradient-renderer-cols) - 1) * 1ch) 1lh;
 		}
@@ -72,26 +74,36 @@
 
 		const gradientCanvas = document.querySelector('#gradient')
 		const metrics = calcMetrics(gradientCanvas)
-		const { width, height } = window.visualViewport
-		const cols = 80 // Math.round(width / metrics.cellWidth) + 1
-		const rows = Math.round(height / metrics.lineHeight) + 1
 
-		run(program, {
+		const getDimensions = () => {
+			const { width, height } = window.visualViewport
+			return {
+				cols: Math.ceil(width / metrics.cellWidth) + 1,
+				rows: Math.ceil(height / metrics.lineHeight) + 1
+			}
+		}
+
+		const context = await run(program, {
 			once: false,
 			allowSelect: false,
 			element : gradientCanvas,
-			fps: '60',
+			fps: 75,
 			renderer: 'gradient',
-			cols,
-			rows,
+			...getDimensions(),
 			color: 'transparent',
 			// FIXME: have to be transparent for `doom_flame_full_color.js`
 			backgroundColor: 'transparent'
-		}).then(function(e){
-			console.log(e)
 		}).catch(function(e) {
 			console.warn(e.message)
 			console.log(e.error)
+		})
+
+		window.addEventListener('resize', () => {
+			const dimensions = getDimensions()
+
+			// FIXME: That's some kind of hacky. Would be more conformable, if we could re-configure the "canvas"
+			context.settings.cols = dimensions.cols
+			context.settings.rows = dimensions.rows
 		})
 	</script>
 </body>
