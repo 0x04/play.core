@@ -25,6 +25,9 @@ function render(context, buffer) {
         backBuffer.length = 0
     }
 
+    element.style.setProperty('--gradient-renderer-cols', cols);
+    element.style.setProperty('--gradient-renderer-rows', rows);
+
     // DOM rows update: expand lines if necessary
     // TODO: also benchmark a complete 'innerHTML' rewrite, could be faster?
     while (element.childElementCount < rows) {
