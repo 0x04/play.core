@@ -5,29 +5,36 @@
 	<title>Test single</title>
 	<style>
 
+		html,
 		body {
-			margin: 1rem;
-			background: rgba(0, 0, 0, 0.25);
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			background: #000;
 			font-family: Consolas, monospace;
+			overflow: hidden;
+			display: flex;
 		}
 
 		.gradient-renderer {
+			--gradient-renderer-cols: 80;
+			--gradient-renderer-row: 40;
 			--gradient-renderer-font-size: 1rem;
 			--gradient-renderer-line-bg: none;
 			--gradient-renderer-line-fg: #000;
 			--gradient-renderer-line-height: 1.125;
 			--gradient-renderer-calculated-line-height: calc(var(--gradient-renderer-font-size) * var(--gradient-renderer-line-height));
-			display: inline-flex;
-			flex-direction: column;
+			display: inline-block;
 			font-size: var(--gradient-renderer-font-size);
 			line-height: var(--gradient-renderer-calculated-line-height);
-			margin-top: 0;
-			font-optical-sizing: none;
-			font-kerning: none;
+			margin: auto;
 		}
 
 		/* Colorize foreground */
 		.gradient-renderer > span {
+			display: block;
 			position: relative;
 			color: transparent;
 
@@ -37,6 +44,7 @@
 			 * - `content-box` - work!
 			 */
 			background: var(--gradient-renderer-line-fg);
+			background-position: 0 0;
 			background-clip: text !important;
 			-webkit-background-clip: text !important;
 		}
@@ -48,6 +56,8 @@
 			z-index: -1;
 			content: '';
 			background: var(--gradient-renderer-line-bg);
+			background-position: 0 0;
+			background-size: calc((var(--gradient-renderer-cols) - 1) * 1ch) 1lh;
 		}
 
 	</style>
@@ -57,17 +67,24 @@
 	<pre id="gradient" class="gradient-renderer"></pre>
 
 	<script type="module">
-		import { run } from './src/run.js'
+		import { run, calcMetrics } from './src/run.js'
 		import * as program from './src/programs/demos/doom_flame_full_color.js'
 
+		const gradientCanvas = document.querySelector('#gradient')
+		const metrics = calcMetrics(gradientCanvas)
+		const { width, height } = window.visualViewport
+		const cols = 80 // Math.round(width / metrics.cellWidth) + 1
+		const rows = Math.round(height / metrics.lineHeight) + 1
+
 		run(program, {
-			allowSelect: true,
-			element : document.querySelector('#gradient'),
+			once: false,
+			allowSelect: false,
+			element : gradientCanvas,
 			fps: '60',
 			renderer: 'gradient',
-			cols: 80,
-			rows: 30,
-			color: 'black',
+			cols,
+			rows,
+			color: 'transparent',
 			// FIXME: have to be transparent for `doom_flame_full_color.js`
 			backgroundColor: 'transparent'
 		}).then(function(e){
